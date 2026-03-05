@@ -1,0 +1,234 @@
+---
+title: "Aula de Introdução"
+author: "Tiago Afonso"
+date: today
+output: html
+toc: true
+---
+
+# Introdução ao R
+
+## Preparar o ambiente
+
+O R é um software de código aberto para análise de dados, estatística e visualização. Antes de começar a utilizar o `R` é necessário instalr o software e uma IDE.
+
+1. Instalar o `R` através do [Download do R](https://cran.r-project.org/) (é necessário escolher o sistema operativo)
+      - [Windows](https://cran.r-project.org/bin/windows/base/)
+      - [MacOS](https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.5.2-arm64.pkg)
+      - [Linux](https://cran.r-project.org/bin/linux/)
+
+2. Instalar uma IDE para programar em `R`. A IDE mais utilizada é o RStudio, contudo surgiu, recentemente, uma nova IDE chamada Posit. Ambas as IDEs são gratuitas e de código aberto.
+      - [RStudio](https://posit.co/download/rstudio-desktop/)
+      - [Posit](https://posit.co/products/ide/positron/)
+
+Neste momentom o `Posit` é uma IDE mais leve e rápida do que o `RStudio`.
+
+Uma vista geral do `Posit` pode ser encontrado [aqui](https://rstudio.github.io/cheatsheets/positron.pdf).
+
+---
+
+## Primeiros passos
+
+### Consola vs Script
+
+A consola (painel inferior) é utilizada para executar código de forma interativa, ou seja, linha a linha. A consolsa permite testar código, nomralmente é utilizada para executar código que não pretendemos guardar. Basta pressionar `Enter` para executar o código.
+
+O script (painel superior ou control) é utilizado para escrever código de forma estruturada, ou seja, em blocos. O script permite guardar o código e é utilizado para escrever código que pretendemos reutilizar. Para criar um novo script basta clicar em `File` -> `New File` -> `R File`. Para executar o código do script basta selecionar o código e pressionar `Ctrl + Enter` (Windows) ou `Cmd + Enter` (MacOS) deste que o cursor esteja na linha do código que pretendemos executar.
+
+###  Limpar o ambiente do `R`
+
+```{r}
+#| label: limpar_ambiente
+# limpar o ambiente
+rm(list = ls())
+```
+
+Antes de iniciar qualquer projeto no R é importante limpar o ambiente para evitar conflitos entre variáveis.
+
+### Efetuar cálculos básicos
+
+```{r}
+#| label: calculos_basicos
+# efetuar cálculos
+2+2
+```
+
+o `R` funciona como uma calculadora, ou seja, é possível efetuar cálculos básicos como adição, subtração, multiplicação e divisão.
+
+### Criar objetos no `R`
+
+```{r}
+#| label: criar_objetos
+# atribuir o resultado a um objeto (alt + -)
+x <- 2
+4 -> y
+```
+
+### Cálculos com objetos
+
+```{r}
+#| label: calculos_com_objetos
+# remover um objeto do ambiente x
+rm(x)
+
+# criar novos objetos
+y <- 7
+w <- 8
+x <- y + w
+```
+
+# Importar dados externos
+
+```{r}
+#| label: importar_dados
+# remover todas as variáveis do ambiente
+rm(list = ls())
+```
+
+## Instalar biblioteca `readxl` para ler ficheiros Excel. Para isso é necessário utilizar a função `install.packages` para instalar a biblioteca.
+
+Para instalar é necessário colocar o nome da biblioteca com `"nome_da_biblioteca"`
+
+```{r}
+#| label: instalar_biblioteca
+#| eval: false
+install.packages("readxl")
+```
+
+## Carregar a biblioteca
+
+```{r}
+#| label: carregar_biblioteca
+library(readxl)
+```
+
+Se uma biblioteca não estiver instalada é necessário instalar a biblioteca antes de carregar a biblioteca. Caso contrário, o R irá retornar um erro indicando que a biblioteca não foi encontrada: `Error in library(readxl) : there is no package called 'readxl'`.
+
+## Carregar dados com a funão `read_xlsx`
+
+```{r}
+# importar dados
+pcasas <- read_xlsx("hprice1.xlsx")
+```
+
+Os dados das casas estão organizados da seguinte forma:
+
+| Variável   | Definição                        |
+|------------|----------------------------------|
+| `price`    | preço da casa (milhares de US\$) |
+| `assess`   | avaliação da casa                |
+| `bdrms`    | nº de divisões                   |
+| `lotsize`  | área do terreno                  |
+| `sqrft`    | área da casa                     |
+| `colonial` | = 1, arquitetura colonial        |
+
+Para ver as variáveis do dataset basta utilizar a função `colnames`:
+
+```{r}
+#| label: ver_variaveis
+colnames(pcasas)
+```
+
+## Estatística descritiva das variáveis
+
+```{r}
+#| label: estatistica_descritiva
+
+#esatística descritiva
+summary(pcasas)
+```
+
+## Calculos entre colunas de um data frame
+
+```{r}
+#| label: calculos_entre_colunas
+# somar duas colunas bdrms + lotsize
+pcasas$soma <- pcasas$bdrms + pcasas$lotsize
+```
+
+É necessário escrever o nome do data frame seguido do operador `$` para escolher uma coluna específica.
+Também é possível criar colunas através da funçpão `mutate` do pacote `dplyr`:
+
+```{r}
+#| label: criar_coluna_mutate
+
+#install.packages("dplyr")
+library(dplyr)
+# criar nova coluna com mutate
+pcasas <- pcasas |>
+  mutate(soma_2 = bdrms + lotsize)
+```
+
+onde o operador `|>` é utilizado para encadear operações, ou seja, para passar o resultado de uma operação para a próxima operação. O operador `|>` "lê-se" **então**.
+
+
+# Análise de dados
+
+## Quantas casas têm 3 divisões?
+
+Gráfico com tidyplots
+
+```{r}
+#| label: grafico_bdrms
+
+library(tidyplots)
+
+pcasas |> 
+      tidyplot(x=bdrms, y=price) |>
+      add_data_points(white_border = TRUE)
+```
+
+## Quantas casas têm estilo colonial?
+
+```{r}
+#frequência absoluta
+table(pcasas$colonial)
+```
+
+## Quais os fatores que influenciam positivamente o preço das casa?
+
+Estimar um modelo:
+
+```{r}
+# estimar modelo
+m_price <- lm(price ~ lotsize + bdrms + assess+ sqrft + colonial, pcasas)
+summary(m_price)
+```
+
+## Será que a 1ª casa da amostra foi vendida abaixo ou acima do preço de mercado?
+
+Ver dados
+
+```{r}
+head(pcasas)
+```
+
+Calcular o valor de mercado das casas
+
+```{r}
+#valor estimado das casas
+pcasas$valor <- fitted(m_price)
+head(pcasas)
+```
+
+Calcular a diferença entre o preço de mercado e o preço praticado
+
+```{r}
+pcasas$resid <- resid(m_price)
+head(pcasas)
+```
+
+Filtra colunas de interesse
+
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+Como selcionar as colunas de interesse
+
+```{r}
+pcasa_2 <- pcasas |>
+  select(price, valor, resid)
+head(pcasa_2)
+```
